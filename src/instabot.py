@@ -614,6 +614,9 @@ class InstaBot:
                     self.write_log(log_string)
                     username = self.get_username_by_user_id(user_id=user_id)
                     insert_username(self, user_id=user_id, username=username)
+                elif follow.status_code == 400:
+                    self.write_log("Problem with following - code 400.")
+                    return False
                 return follow
             except:
                 logging.exception("Except on follow!")
@@ -745,14 +748,11 @@ class InstaBot:
             log_string = "Trying to follow: %s" % (
                 self.media_by_tag[0]['node']["owner"]["id"])
             self.write_log(log_string)
-
             if self.follow(self.media_by_tag[0]['node']["owner"]["id"]) != False:
-                self.bot_follow_list.append(
-                    [self.media_by_tag[0]['node']["owner"]["id"], time.time()])
-                self.next_iteration["Follow"] = time.time() + \
-                                                self.add_time(self.follow_delay)
+                self.bot_follow_list.append( [self.media_by_tag[0]['node']["owner"]["id"], time.time()] )
+                self.next_iteration["Follow"] = time.time() +  self.add_time(self.follow_delay)
             else: 
-                self.write_log("Czekam godzinę, bo znow nie chce follow wejsc.")
+                self.write_log("Wainting one hour, because we're banned for follows.")
                 time.sleep(20 * 60)
                 self.auto_unfollow()
                 time.sleep(20 * 60)
