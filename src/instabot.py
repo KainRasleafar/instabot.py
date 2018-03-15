@@ -751,6 +751,13 @@ class InstaBot:
                     [self.media_by_tag[0]['node']["owner"]["id"], time.time()])
                 self.next_iteration["Follow"] = time.time() + \
                                                 self.add_time(self.follow_delay)
+            else: 
+                self.write_log("Czekam godzinę, bo znow nie chce follow wejsc.")
+                time.sleep(20 * 60)
+                self.auto_unfollow()
+                time.sleep(20 * 60)
+                self.auto_unfollow()
+                time.sleep(20 * 60)
 
     def new_auto_mod_unfollow(self):
         if time.time() > self.next_iteration["Unfollow"] and self.unfollow_per_day != 0:
@@ -845,14 +852,13 @@ class InstaBot:
                     r = self.s.get(url_tag)
                     all_data = json.loads(r.text)
 
-                    user_info = all_data['user']
+                    user_info = all_data["graphql"]['user']
                     i = 0
                     log_string = "Checking user info.."
                     self.write_log(log_string)
-
-                    follows = user_info['follows']['count']
-                    follower = user_info['followed_by']['count']
-                    media = user_info['media']['count']
+                    follows = user_info['edge_follow']['count']
+                    follower = user_info['edge_followed_by']['count']
+		    media = user_info['edge_owner_to_timeline_media']['count']
                     follow_viewer = user_info['follows_viewer']
                     followed_by_viewer = user_info[
                         'followed_by_viewer']
@@ -860,7 +866,7 @@ class InstaBot:
                         'requested_by_viewer']
                     has_requested_viewer = user_info[
                         'has_requested_viewer']
-                    log_string = "Follower : %i" % (follower)
+		    log_string = "Follower : %i" % (follower)
                     self.write_log(log_string)
                     log_string = "Following : %s" % (follows)
                     self.write_log(log_string)
@@ -912,7 +918,8 @@ class InstaBot:
                     self.is_selebgram is not False
                     or self.is_fake_account is not False
                     or self.is_active_user is not True
-                    or self.is_follower is not True
+                   # or self.is_follower is True      # do czyszczenia i zostawienia jedynie bialej listy
+                    or self.is_follower is False
             ):
                 self.write_log(current_user)
                 self.unfollow(current_id)
